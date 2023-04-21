@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  webapp:
+    build: 
+      context: ./backend/
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend/src:/src
+    ports:
+      - "8007:8000"
+    environment:
+      - DJANGO_REDIS_HOST=redis
+      - DJANGO_REDIS_PORT=6379
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+    networks:
+      - core-network
+      - geoguide
+
+  redis:
+    image: redis
+    networks:
+      - geoguide
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    networks:
+      - geoguide
+
+volumes:
+  postgres_data:
+
+networks:
+  geoguide:
+    external: false
+  core-network: 
+    external: true
